@@ -44,3 +44,37 @@ pub fn draw_score_board(context: &mut Context, score: i32) -> Result<(), GameErr
     graphics::draw(context, &text, draw_param)?;
     Ok(())
 }
+
+pub fn draw_game_over_screen(context: &mut Context, score: i32) -> Result<(), GameError> {
+    let mut game_over_text = Text::new(format!("Game Over!"));
+    game_over_text.set_font(graphics::Font::default(), graphics::Scale::uniform(40.0));
+
+    let (screen_width, screen_height) = graphics::drawable_size(context);
+    let screen_width_half = screen_width * 0.5;
+    let screen_height_half = screen_height * 0.5;
+    let (game_over_text_w, game_over_text_h) = game_over_text.dimensions(context);
+    let game_over_pos = na::Point2::new(
+        screen_width_half - (game_over_text_w / 2) as f32,
+        screen_height_half,
+    );
+
+    let mut draw_param = graphics::DrawParam::default();
+    draw_param.dest = game_over_pos.into();
+    graphics::draw(context, &game_over_text, draw_param)?;
+
+    let mut start_again_text = Text::new(format!("Press space to start again."));
+    start_again_text.set_font(graphics::Font::default(), graphics::Scale::uniform(20.0));
+
+    let (screen_width, screen_height) = graphics::drawable_size(context);
+    let screend_width_half = screen_width * 0.5;
+    let screen_height_half = screen_height * 0.5;
+    let start_again_text_w = start_again_text.dimensions(context).0;
+    let start_again_pos = na::Point2::new(
+        screend_width_half - (start_again_text_w / 2) as f32,
+        screen_height_half + game_over_text_h as f32 + 10.0,
+    );
+
+    let mut draw_param = graphics::DrawParam::default();
+    draw_param.dest = start_again_pos.into();
+    graphics::draw(context, &start_again_text, draw_param)
+}
