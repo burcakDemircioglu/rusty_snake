@@ -6,35 +6,39 @@ use ggez::{
 
 use crate::utilities::constants;
 
-pub fn set_controls(context: &mut Context, body_positions: &mut std::vec::Vec<na::Point2<f32>>) {
-    let mut queue = body_positions[0];
-    let head = body_positions[body_positions.len()-1];
-
-    if keyboard::is_key_pressed(context, KeyCode::Right) {
-        queue.x = head.x + constants::BODY_SIZE;
-        queue.y = head.y;
-        body_positions.remove(0);
-        body_positions.push(queue);
+pub fn clamp(position: &mut na::Point2<f32>, max_width: f32, max_height: f32) {
+    if position.x < 0.0 - (constants::BODY_SIZE / 2.0) {
+        position.x += max_width;
+    } else if position.x > max_width + (constants::BODY_SIZE / 2.0) {
+        position.x -= max_width;
     }
 
-    if keyboard::is_key_pressed(context, KeyCode::Left) {
-        queue.x = head.x - constants::BODY_SIZE;
-        queue.y = head.y;
-        body_positions.remove(0);
-        body_positions.push(queue);
+    if position.y < 0.0 - (constants::BODY_SIZE / 2.0) {
+        position.y += max_height;
+    } else if position.y > max_height + (constants::BODY_SIZE / 2.0) {
+        position.y -= max_height;
     }
+}
 
-    if keyboard::is_key_pressed(context, KeyCode::Down) {
-        queue.x = head.x;
-        queue.y = head.y + constants::BODY_SIZE;
-        body_positions.remove(0);
-        body_positions.push(queue);
-    }
+pub fn is_hit(
+    body_positions: &mut std::vec::Vec<na::Point2<f32>>,
+    food_positions: &mut std::vec::Vec<na::Point2<f32>>,
+) -> (bool, i32) {
+    let head = body_positions[body_positions.len() - 1];
 
-    if keyboard::is_key_pressed(context, KeyCode::Up) {
-        queue.x = head.x;
-        queue.y = head.y - constants::BODY_SIZE;
-        body_positions.remove(0);
-        body_positions.push(queue);
+    for food_index in 0..food_positions.len() {
+        let food = food_positions[food_index];
+        if (head.x + constants::BODY_SIZE / 2.0 > food.x - constants::FOOD_SIZE / 2.0
+            && head.x + constants::BODY_SIZE / 2.0 < food.x + constants::FOOD_SIZE / 2.0
+            && head.y + constants::BODY_SIZE / 2.0 > food.y - constants::FOOD_SIZE / 2.0
+            && head.y + constants::BODY_SIZE / 2.0 < food.y + constants::FOOD_SIZE / 2.0)
+            || (head.x - constants::BODY_SIZE / 2.0 > food.x - constants::FOOD_SIZE / 2.0
+                && head.x - constants::BODY_SIZE / 2.0 < food.x + constants::FOOD_SIZE / 2.0
+                && head.y - constants::BODY_SIZE / 2.0 > food.y - constants::FOOD_SIZE / 2.0
+                && head.y - constants::BODY_SIZE / 2.0 < food.y + constants::FOOD_SIZE / 2.0)
+        {
+            return (true, food_index as i32);
+        }
     }
+    return (false, -1);
 }
