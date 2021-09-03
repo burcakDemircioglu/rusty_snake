@@ -47,13 +47,14 @@ impl event::EventHandler for GameState {
         let (hit, eaten_food_index) =
             utility::is_hit(&mut self.body_positions, &mut self.food_positions);
         if hit {
+            self.score += 1;
             self.food_positions
                 .remove(eaten_food_index.try_into().unwrap());
 
             self.food_positions.push(na::Point2::<f32>::new(
-            rng.gen_range(0.0, screen_width - constants::FOOD_SIZE),
-            rng.gen_range(0.0, screen_hight - constants::FOOD_SIZE),
-        ));
+                rng.gen_range(0.0, screen_width - constants::FOOD_SIZE),
+                rng.gen_range(0.0, screen_hight - constants::FOOD_SIZE),
+            ));
         }
         update::set_controls(context, &mut self.body_speed);
         update::move_snake(context, &mut self.body_positions, &mut self.body_speed, hit);
@@ -65,6 +66,7 @@ impl event::EventHandler for GameState {
 
         draw::draw_body(context, &mut self.body_positions)?;
         draw::draw_foods(context, &mut self.food_positions)?;
+        draw::draw_score_board(context, self.score)?;
 
         graphics::present(context)?;
         Ok(())
